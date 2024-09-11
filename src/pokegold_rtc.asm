@@ -14,22 +14,6 @@
 ; SHA-256: fb0016d27b1e5374e1ec9fcad60e6628d8646103b5313ca683417f52b97e7e4e
 
 
-; # first place pokegold.gbc in the same directory as this file
-; rgbasm -opokegold_rtc.obj pokegold_rtc.asm
-; rgblink -o pokegold_rtc.gbc -Opokegold.gbc -npokegold_rtc.sym pokegold_rtc.obj
-; rgbfix -p0 -v pokegold_rtc.gbc
-; flips --create --bps pokegold.gbc pokegold_rtc.gbc pokegold_rtc.bps
-
-
-; $d15b = wScriptFlags
-; $ce63 = wJumptableIndex
-;	         $c5c0 = wSpriteAnimID
-;	         $c5c0 = wCurSpriteOAMFlags
-;	         $c5c0 = wSpriteAnimAddrBackup
-
-
-
-
 DEF A_BUTTON   EQU 1 << 0
 DEF B_BUTTON   EQU 1 << 1
 DEF SELECT     EQU 1 << 2
