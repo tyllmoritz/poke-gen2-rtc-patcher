@@ -1,7 +1,11 @@
 roms := \
-        pokegold_rtc.gbc
+        roms/pokegold_rtc.gbc\
+	roms/pokesilver_rtc.gbc \
+	roms/pokecrystal_rtc.gbc
 
 pokegold_rtc_baserom = pokegold.gbc
+pokesilver_rtc_baserom = pokesilver.gbc
+pokecrystal_rtc_baserom = pokecrystal.gbc
 
 RGBDS ?=
 RGBASM  ?= $(RGBDS)rgbasm
@@ -16,7 +20,7 @@ endif
 RGBLINKFLAGS += -O roms/$($*_baserom)
 RGBFIXFLAGS = -p0 -v
 
-.PHONY: all gold_rtc
+.PHONY: clean all gold_rtc
 .SECONDEXPANSION:
 
 patches/%.bps: roms/%.gbc roms/$$(%_baserom)
@@ -29,16 +33,22 @@ roms/%.gbc: src/%.o roms/$$(%_baserom)
 %.o: %.asm
 	$(RGBASM) -o $@ $<
 
-all: gold_rtc
+all: gold_rtc silver_rtc crystal_rtc
 
 gold_rtc: patches/pokegold_rtc.bps
 
-roms: roms/pokegold_rtc.gbc
+silver_rtc: patches/pokesilver_rtc.bps
+
+crystal_rtc: patches/pokecrystal_rtc.bps
+
+roms:   roms/pokegold_rtc.gbc \
+	roms/pokesilver_rtc.gbc \
+	roms/pokecrystal_rtc.gbc
 
 clean:
-	$(RM) roms/$(roms) \
-	roms/$(roms:.gbc=.sym) \
-	roms/$(roms:.gbc=.map) \
-	src/$(roms:.gbc=.o) \
-	patches/$(roms:.gbc=.bps)
+	$(RM) $(roms) \
+	$(roms:.gbc=.sym) \
+	$(roms:.gbc=.map) \
+	$(patsubst roms/%,src/%,$(roms:.gbc=.o)) \
+	$(patsubst roms/%,patches/%,$(roms:.gbc=.bps))
 

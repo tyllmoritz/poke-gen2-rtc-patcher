@@ -1,5 +1,5 @@
-RTC Patch for Pokemon Gold
-==========================
+RTC Patch for Pokemon Crystal/Gold/Silver
+=========================================
 
 
 disassembled from:<br>
@@ -17,7 +17,7 @@ Thanks to [marcobledo's batteryless patcher](https://github.com/marcrobledo/game
 
 How to
 ------
-1. get a pokemon gold rom and save it to roms/pokegold.gbc
+1. get a pokemon crystal/gold/silver rom and save it to roms/ as pokecrystal.gbc, pokegold.gbc and pokesilver.gbc
 2. install rgbds and flips
 3. run make
 <br>
@@ -28,4 +28,5 @@ rgbasm -opokegold_rtc.o src/pokegold_rtc.asm
 rgblink -o pokegold_rtc.gbc -O roms/pokegold.gbc pokegold_rtc.o
 rm pokegold_rtc.o
 rgbfix -p0 -v pokegold_rtc.gbc
-flips --create --bps pokegold.gbc pokegold_rtc.gbc pokegold_rtc.bps```
+flips --create --bps pokegold.gbc pokegold_rtc.gbc pokegold_rtc.bps
+```

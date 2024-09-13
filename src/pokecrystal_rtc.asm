@@ -23,9 +23,9 @@ DEF D_LEFT     EQU 1 << 5
 DEF D_UP       EQU 1 << 6
 DEF D_DOWN     EQU 1 << 7
 
-DEF hJoypadDown EQU $ffa6
+DEF hJoypadDown EQU $ffa4
 
-SECTION "WRAM - Time", WRAMX[$d1dc], BANK[$1]
+SECTION "WRAM - Time", WRAMX[$d4b6], BANK[$1]
 ; init time set at newgame
 wStartDay::    db
 wStartHour::   db
@@ -36,48 +36,45 @@ wStartSecond:: db
 
 
 
-SECTION "ROM - Bank 0 free space #1", ROM0[$0051]
-FixAndUpdateTime:
-call FixTime                 ; orig unmodified function
-jp UpdateTime.afterFixTime   ; in UpdateTime (after our modified call to FixTime - run farcall GetTimeOfDay, then ret)
-
-
-SECTION "ROM - Bank 0 free space #2", ROM0[$0063]
+SECTION "ROM - Bank 0 free space #1", ROM0[$3fb5]
 ChangeTimeInPokegear:
-ld hl,FixAndUpdateTime
-ld a,[$D15B]        ; is wScriptFlags = 4 ?
-cp a,4
-jr z,.006E          ; continue or
-jp hl               ; jump to FixAndUpdateTime
-.006E:
-ld a,[$C5C1]        ; is wSpriteAnimAddrBackup+1 = $5c ?
+ld a,[$cfb9] ; is  wFarCallBC = $c5 ?
+; TODO: use wSpriteAnimAddrBackup + 1 instead - as in gold and silver
 cp a,$c5
-jr z,.0076          ; continue or
-jp hl               ; jump to FixAndUpdateTime
-.0076:
-ld a,[$CE63]        ; is wJumptableIndex = 1 ?
+jr z,.3fbf
+jp FixTime
+.3fbf
+ld a,[$cf63] ; is wJumptableIndex = 1 ?
 cp a,1
-jr z,.checkAButton  ; continue or
-jp hl               ; jump to FixAndUpdateTime
-.checkAButton:
+jr z,.3fc9
+jp FixTime
+.3fc9
+ld a,[$d434] ; is wScriptFlags = 4 ?
+cp a,4
+jr z,.checkAButton
+jp FixTime
+.checkAButton
 ld b,1
 ldh a,[hJoypadDown]
 and a,A_BUTTON
 jr z,.checkUpButton
-ld b,5
+ld b,8
 .checkUpButton:
 ldh a,[hJoypadDown]
 and a,D_UP
 jr z,.checkDownButton
 call increaseTime
+jp FixTime
 .checkDownButton
 ldh a,[hJoypadDown]
 and a,D_DOWN
 jr z,.noChange
 call decreaseTime
 .noChange:
-jp hl               ; jump to FixAndUpdateTime
+jp FixTime
 
+
+SECTION "ROM - Bank0 free space #2", ROM0[$0065]
 increaseTime:
 ld a,[wStartMinute]
 add b               ; increase Minutes
@@ -137,29 +134,30 @@ ret
 
 
 
-SECTION "UpdateTime: change jump", ROM0[$046D]
+SECTION "UpdateTime: change jump", ROM0[$05ad]
 ;UpdateTime::
 ;   call GetClock
 ;   call FixDays
-UpdateTime.fixTime:         ; <- new at 00:046D
-;   call FixTime  ;$04de    ; <- orig code - is overwritten
-    jp ChangeTimeInPokegear ; <- new  code
-UpdateTime.afterFixTime:    ; <- new at 00:0470
+UpdateTime.fixTime:         ; <- new at 00:05ad
+;   call FixTime            ; <- orig code - is overwritten
+    call ChangeTimeInPokegear ; <- new  code
+UpdateTime.afterFixTime:    ; <- new at 00:05b0
 ;   farcall GetTimeOfDay
 ;   ret
 
 
-SECTION "FixTime", ROM0[$04de]
+SECTION "FixTime", ROM0[$061d]
 FixTime:
     ;orig code unmodified - only for Label
 
-SECTION "PokegearClock_Joypad: overwrite exit Buttons", ROMX[$4F0E], BANK[$24]
+
+SECTION "PokegearClock_Joypad: overwrite exit Buttons", ROMX[$4F45], BANK[$24]
 
 ;PokegearClock_Joypad:
 ;   call .UpdateClock
 ;   ld hl, hJoyLast
 ;   ld a, [hl]
-PokegearClock_Joypad.buttoncheck:               ; <- new at 24:4F0E
+PokegearClock_Joypad.buttoncheck:               ; <- new at 24:4F45
 ;   and A_BUTTON | B_BUTTON | START | SELECT    ; <- orig code - is overwritten
     and B_BUTTON | START | SELECT               ; <- new  code
 ;   jr nz, .quit
