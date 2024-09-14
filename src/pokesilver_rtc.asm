@@ -14,6 +14,3 @@
 ; SHA-256: 72b190859a59623cbef6c49d601f8de52c1d2331b4f08a8d2acc17274fc19a8c
 
 INCLUDE "src/pokegold_rtc.asm"
-
-SECTION "ROM Bank0, Offset5B", ROM0[$005B]
-ld d,c
