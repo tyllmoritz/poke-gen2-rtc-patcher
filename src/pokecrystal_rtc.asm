@@ -13,7 +13,7 @@
 ; SHA-1: f4cd194bdee0d04ca4eac29e09b8e4e9d818c133
 ; SHA-256: d6702e353dcbe2d2c69183046c878ef13a0dae4006e8cdff521cca83dd1582fe
 
-DEF _CRYSTAL EQU 1
+
 
 DEF Bank0_FreeSpace_0 EQU $0063
 DEF Bank0_FreeSpace_1 EQU $3fb5
