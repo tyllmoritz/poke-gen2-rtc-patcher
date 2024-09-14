@@ -22,39 +22,6 @@ IF DEF(_JUMP_OPTIMISATION)
 ld hl,FixAndUpdateTime
 ENDC
 
-IF DEF(_CRYSTAL)
-
-ld a,[wFarCallBC] ; TODO: use wSpriteAnimAddrBackup + 1 instead - as in gold and silver
-cp a,$c5
-jr z,.continue1
-IF DEF(_JUMP_OPTIMISATION)
-jp hl               ; jump to FixAndUpdateTime
-ELSE
-jp FixTime
-ENDC
-
-.continue1
-ld a,[wJumptableIndex]
-cp a,1
-jr z,.continue2
-IF DEF(_JUMP_OPTIMISATION)
-jp hl               ; jump to FixAndUpdateTime
-ELSE
-jp FixTime
-ENDC
-
-.continue2
-ld a,[wScriptFlags]
-cp a,4
-jr z,.checkAButton
-IF DEF(_JUMP_OPTIMISATION)
-jp hl               ; jump to FixAndUpdateTime
-ELSE
-jp FixTime
-ENDC
-
-ELSE
-
 ld a,[wScriptFlags]
 cp a,4
 jr z,.continue1          ; continue or
@@ -66,7 +33,7 @@ ENDC
 
 .continue1:
 ld a,[wSpriteAnimAddrBackup + 1]
-cp a,$c5
+cp a,wSpriteAnimAddrBackup_Value
 jr z,.continue2          ; continue or
 IF DEF(_JUMP_OPTIMISATION)
 jp hl               ; jump to FixAndUpdateTime
@@ -84,18 +51,12 @@ ELSE
 jp FixTime
 ENDC
 
-ENDC
-
 .checkAButton:
 ld b,1
 ldh a,[hJoypadDown]
 and a,A_BUTTON
 jr z,.checkUpButton
-IF DEF(_CRYSTAL)
-ld b,8
-ELSE
 ld b,5
-ENDC
 .checkUpButton:
 ldh a,[hJoypadDown]
 and a,D_UP

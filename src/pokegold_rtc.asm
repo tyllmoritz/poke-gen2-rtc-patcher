@@ -25,6 +25,7 @@ DEF hJoypadDown EQU $ffa6
 DEF wStartDay_ EQU $d1dc
 DEF wScriptFlags EQU $d15b
 DEF wSpriteAnimAddrBackup EQU $c5c0
+DEF wSpriteAnimAddrBackup_Value EQU $c5
 DEF wJumptableIndex EQU $ce63
 
 DEF UpdateTime_FixTime_ EQU $046d

@@ -2,7 +2,7 @@
 ; --------------------------
 ; disassembled from:
 ; https://www.infine.st/
-; https://www.romhacking.net/hacks/3841/
+; https://www.romhacking.net/hacks/4451/
 ; --------------------------
 ; This patch allows the player to change the real-time clock while in the Pokegears clock menu.
 ; Simply press up to advance and down to turn back the time.
