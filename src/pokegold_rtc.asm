@@ -15,8 +15,6 @@
 
 
 
-DEF _JUMP_OPTIMISATION EQU 1
-
 DEF Bank0_FreeSpace_0 EQU $0051
 DEF Bank0_FreeSpace_1 EQU $0063
 DEF Bank0_FreeSpace_2 EQU $009b

@@ -8,48 +8,31 @@ DEF D_UP       EQU 1 << 6
 DEF D_DOWN     EQU 1 << 7
 
 
-IF DEF(_JUMP_OPTIMISATION)
 SECTION "ROM - Bank 0 free space #0", ROM0[Bank0_FreeSpace_0]
 FixAndUpdateTime:
 call FixTime                 ; orig unmodified function
 jp UpdateTime.afterFixTime   ; in UpdateTime (after our modified call to FixTime - run farcall GetTimeOfDay, then ret)
-ENDC
 
 SECTION "ROM - Bank 0 free space #1", ROM0[Bank0_FreeSpace_1]
 ChangeTimeInPokegear:
 
-IF DEF(_JUMP_OPTIMISATION)
 ld hl,FixAndUpdateTime
-ENDC
-
 ld a,[wScriptFlags]
 cp a,4
 jr z,.continue1          ; continue or
-IF DEF(_JUMP_OPTIMISATION)
 jp hl               ; jump to FixAndUpdateTime
-ELSE
-jp FixTime
-ENDC
 
 .continue1:
 ld a,[wSpriteAnimAddrBackup + 1]
 cp a,wSpriteAnimAddrBackup_Value
 jr z,.continue2          ; continue or
-IF DEF(_JUMP_OPTIMISATION)
 jp hl               ; jump to FixAndUpdateTime
-ELSE
-jp FixTime
-ENDC
 
 .continue2:
 ld a,[wJumptableIndex]
 cp a,1
 jr z,.checkAButton  ; continue or
-IF DEF(_JUMP_OPTIMISATION)
 jp hl               ; jump to FixAndUpdateTime
-ELSE
-jp FixTime
-ENDC
 
 .checkAButton:
 ld b,1
@@ -62,21 +45,13 @@ ldh a,[hJoypadDown]
 and a,D_UP
 jr z,.checkDownButton
 call increaseTime
-IF DEF(_JUMP_OPTIMISATION)
-ELSE
-jp FixTime
-ENDC
 .checkDownButton
 ldh a,[hJoypadDown]
 and a,D_DOWN
 jr z,.noChange
 call decreaseTime
 .noChange:
-IF DEF(_JUMP_OPTIMISATION)
 jp hl               ; jump to FixAndUpdateTime
-ELSE
-jp FixTime
-ENDC
 
 
 SECTION "WRAM - Time", WRAMX[wStartDay_], BANK[$1]
@@ -159,11 +134,7 @@ SECTION "UpdateTime: change jump", ROM0[UpdateTime_FixTime_]
 ;   call FixDays
 UpdateTime.fixTime:
 ;   call FixTime            ; <- orig code - is overwritten
-IF DEF(_JUMP_OPTIMISATION)
     jp ChangeTimeInPokegear ; <- new  code
-ELSE
-    call ChangeTimeInPokegear
-ENDC
 UpdateTime.afterFixTime:
 ;   farcall GetTimeOfDay
 ;   ret
