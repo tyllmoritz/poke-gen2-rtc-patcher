@@ -9,6 +9,11 @@ pokesilver_rtc_baserom = pokesilver.gbc
 pokecrystal_rtc_baserom = pokecrystal.gbc
 pokecrystal11_rtc_baserom = pokecrystal11.gbc
 
+pokegold_rtc_asmfile = pokegold_rtc
+pokesilver_rtc_asmfile = pokegold_rtc
+pokecrystal_rtc_asmfile = pokecrystal_rtc
+pokecrystal11_rtc_asmfile = pokecrystal_rtc
+
 RGBDS ?=
 RGBASM  ?= $(RGBDS)rgbasm
 RGBFIX  ?= $(RGBDS)rgbfix
@@ -28,7 +33,7 @@ RGBFIXFLAGS = -p0 -v
 patches/%.bps: roms/%.gbc roms/$$(%_baserom)
 	flips --create --bps roms/$($*_baserom) roms/$*.gbc $@
 
-roms/%.gbc: src/%.o roms/$$(%_baserom)
+roms/%.gbc: src/$$(%_asmfile).o roms/$$(%_baserom)
 	$(RGBLINK) $(RGBLINKFLAGS) -o $@ $<
 	$(RGBFIX) $(RGBFIXFLAGS) $@
 
