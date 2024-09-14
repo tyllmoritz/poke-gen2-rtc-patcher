@@ -39,7 +39,7 @@ ld b,1
 ldh a,[hJoypadDown]
 and a,A_BUTTON
 jr z,.checkUpButton
-ld b,5
+ld b,8
 .checkUpButton:
 ldh a,[hJoypadDown]
 and a,D_UP
