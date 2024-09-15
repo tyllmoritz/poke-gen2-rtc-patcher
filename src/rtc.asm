@@ -1,4 +1,4 @@
-DEF FarCall EQU $8
+
 MACRO farcall ; bank, address
 	ld a, BANK(\1)
 	ld hl, \1
