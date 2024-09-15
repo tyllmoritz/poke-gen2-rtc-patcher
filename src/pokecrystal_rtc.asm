@@ -16,8 +16,9 @@
 
 
 DEF Bank0_FreeSpace_0 EQU $0063
-DEF Bank0_FreeSpace_1 EQU $3fb5
-DEF Bank0_FreeSpace_2 EQU $0069
+DEF Bank0_FreeSpace_1 EQU $0069
+DEF BankX_FreeSpace_1 EQU $747b
+DEF BankX_FreeSpace_1_BANKNUMBER EQU $1
 
 DEF hJoypadDown EQU $ffa4
 DEF wStartDay_ EQU $d4b6

@@ -1,3 +1,11 @@
+DEF FarCall EQU $8
+MACRO farcall ; bank, address
+	ld a, BANK(\1)
+	ld hl, \1
+	rst FarCall
+ENDM
+
+
 DEF A_BUTTON   EQU 1 << 0
 DEF B_BUTTON   EQU 1 << 1
 DEF SELECT     EQU 1 << 2
@@ -8,13 +16,30 @@ DEF D_UP       EQU 1 << 6
 DEF D_DOWN     EQU 1 << 7
 
 
+SECTION "WRAM - Time", WRAMX[wStartDay_], BANK[$1]
+; init time set at newgame
+wStartDay::    db
+wStartHour::   db
+wStartMinute:: db
+wStartSecond:: db
+
 SECTION "ROM - Bank 0 free space #0", ROM0[Bank0_FreeSpace_0]
 FixAndUpdateTime:
 call FixTime                 ; orig unmodified function
 jp UpdateTime.afterFixTime   ; in UpdateTime (after our modified call to FixTime - run farcall GetTimeOfDay, then ret)
 
+
 SECTION "ROM - Bank 0 free space #1", ROM0[Bank0_FreeSpace_1]
-ChangeTimeInPokegear:
+ChangeTimeInPokegear::
+ld a, BANK(_ChangeTimeInPokegear)
+ld hl, _ChangeTimeInPokegear
+rst 8
+ret
+
+
+SECTION "ROM - Bank X free space #1", ROMX[BankX_FreeSpace_1], BANK[BankX_FreeSpace_1_BANKNUMBER]
+
+_ChangeTimeInPokegear::
 
 ld hl,FixAndUpdateTime
 ld a,[wScriptFlags]
@@ -54,14 +79,7 @@ call decreaseTime
 jp hl               ; jump to FixAndUpdateTime
 
 
-SECTION "WRAM - Time", WRAMX[wStartDay_], BANK[$1]
-; init time set at newgame
-wStartDay::    db
-wStartHour::   db
-wStartMinute:: db
-wStartSecond:: db
 
-SECTION "ROM - Bank 0 free space #2", ROM0[Bank0_FreeSpace_2]
 increaseTime:
 ld a,[wStartMinute]
 add b               ; increase Minutes
