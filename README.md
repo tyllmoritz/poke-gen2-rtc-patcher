@@ -17,7 +17,7 @@ Thanks to [marcobledo's batteryless patcher](https://github.com/marcrobledo/game
 
 How to build roms/patches
 ------
-1. get a pokemon crystal/gold/silver rom and save it to roms/<subdir>/input.gbc
+1. get a pokemon crystal/gold/silver rom and save it to roms/"romname"/input.gbc
 2. install rgbds and flips
 3. run make
 <br>
@@ -35,8 +35,8 @@ How to add new targets
 ------
 
 to build a new target you need to do the following things
-- create a folder in roms/
-- place a roms/<foldername>/input.gbc file
-- create a roms/<foldername>/settings.asm file
+- create a folder called roms/"romname"
+- copy the baserom to roms/"romname"/input.gbc
+- create a roms/"romname"/settings.asm file
 - rtc patches are only created, if _RTC is found in settings.asm
 - batteryless patches are only created, if _BATTERYLESS is found in settings.asm
