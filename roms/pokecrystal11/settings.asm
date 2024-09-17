@@ -1,40 +1,44 @@
-; RTC Patch for Pokemon Gold
+; RTC Patch for Pokemon Crystal
 ; --------------------------
 ; disassembled from:
 ; https://www.infine.st/
-; https://www.romhacking.net/hacks/4450/
+; https://www.romhacking.net/hacks/3841/
 ; --------------------------
 ; This patch allows the player to change the real-time clock while in the Pokegears clock menu.
 ; Simply press up to advance and down to turn back the time.
 ; Holding the A button allows you to change it faster.
 
-; Patch to "Pokemon - Gold Version (USA, Europe) (SGB Enhanced).gbc"
-; MD5: a6924ce1f9ad2228e1c6580779b23878
-; SHA-1: d8b8a3600a465308c9953dfa04f0081c05bdcb94
-; SHA-256: fb0016d27b1e5374e1ec9fcad60e6628d8646103b5313ca683417f52b97e7e4e
+; Patch to "Pokemon - Crystal Version (USA, Europe).gbc"
+; MD5: 9f2922b235a5eeb78d65594e82ef5dde
+; SHA-1: f4cd194bdee0d04ca4eac29e09b8e4e9d818c133
+; SHA-256: d6702e353dcbe2d2c69183046c878ef13a0dae4006e8cdff521cca83dd1582fe
 
-DEF FarCall EQU $8
 
-DEF Bank0_FreeSpace_0 EQU $0051
-DEF Bank0_FreeSpace_1 EQU $0063
-DEF BankX_FreeSpace_1 EQU $754e
+
+DEF Bank0_FreeSpace_0 EQU $0063
+DEF Bank0_FreeSpace_1 EQU $0069
+DEF BankX_FreeSpace_1 EQU $747b
 DEF BankX_FreeSpace_1_BANKNUMBER EQU $1
 
-DEF hJoypadDown EQU $ffa6
-DEF wStartDay_ EQU $d1dc
-DEF wScriptFlags EQU $d15b
-DEF wSpriteAnimAddrBackup EQU $c5c0
-DEF wSpriteAnimAddrBackup_Value EQU $c5
-DEF wJumptableIndex EQU $ce63
+IF DEF(_RTC)
+DEF FarCall EQU $8
 
-DEF UpdateTime_FixTime_ EQU $046d
-DEF FixTime_ EQU $04de
-DEF PokegearClock_Joypad_buttoncheck_ EQU $4f0e
+
+DEF hJoypadDown EQU $ffa4
+DEF wStartDay_ EQU $d4b6
+DEF wScriptFlags EQU $d434
+DEF wSpriteAnimAddrBackup EQU $c3b8
+DEF wSpriteAnimAddrBackup_Value EQU $c3
+DEF wJumptableIndex EQU $cf63
+
+DEF UpdateTime_FixTime_ EQU $05ad
+DEF FixTime_ EQU $061d
+DEF PokegearClock_Joypad_buttoncheck_ EQU $4F45
 DEF PokegearClock_Joypad_BANK EQU $24
+ENDC
 
-INCLUDE "src/rtc.asm"
 
-
+IF DEF(_BATTERYLESS)
 
 ; CARTRIDGE TYPE AND ROM SIZE
 ; ---------------------------
@@ -59,7 +63,7 @@ DEF SRAM_SIZE_32KB EQU 1
 ; ----------------
 ; Put here the game's boot jp offset found in in 0:0101.
 ; Usually $0150, but could be different depending on game.
-DEF GAME_BOOT_OFFSET EQU $05c6
+DEF GAME_BOOT_OFFSET EQU $016e
 
 
 
@@ -88,7 +92,7 @@ DEF BANK0_FREE_SPACE EQU $70
 ; should be safe to use.
 ; In the worst scenario, use shadow OAM space. It will just glitch sprites for
 ; a single frame.
-DEF WRAM0_FREE_SPACE EQU $c300 ;using Shadow OAM for now
+DEF WRAM0_FREE_SPACE EQU $c400 ;using Shadow OAM for now
 
 
 
@@ -97,7 +101,7 @@ DEF WRAM0_FREE_SPACE EQU $c300 ;using Shadow OAM for now
 ; We need ~80 bytes (~0x50 bytes) to store our new battery-less save code.
 ; As stated above, they will be copied from ROM to WRAM0 when trying to save.
 DEF BATTERYLESS_CODE_BANK EQU $1
-DEF BATTERYLESS_CODE_OFFSET EQU $7640
+DEF BATTERYLESS_CODE_OFFSET EQU $7550
 
 
 
@@ -107,7 +111,7 @@ DEF BATTERYLESS_CODE_OFFSET EQU $7640
 ; restore the correct bank when switching back from VBlank.
 ; We will reuse that byte when switching to our battery-less code bank and,
 ; afterwards, so we can restore to the previous bank.
-DEF GAME_ENGINE_CURRENT_BANK_OFFSET EQU $ff9f
+DEF GAME_ENGINE_CURRENT_BANK_OFFSET EQU $ff9d
 
 
 
@@ -133,20 +137,20 @@ DEF EMBED_SAVEGAME EQU 1
 ; ------------------------
 ; We need to find the original game's saving subroutine and hook our new code
 ; afterwards.
-SECTION "Original call #1 to _SaveGameData", ROMX[$4c23], BANK[$05]
-;call	$4ccc ; _SaveGameData
+SECTION "Original call #1 to _SaveGameData", ROMX[$4b85], BANK[$05]
+;call	$4c10 ; _SaveGameData
 call	save_sram_hook
-SECTION "Original call #2 to _SaveGameData", ROMX[$4ca2], BANK[$05]
-;call	$4ccc ; _SaveGameData
+SECTION "Original call #2 to _SaveGameData", ROMX[$4be6], BANK[$05]
+;call	$4c10 ; _SaveGameData
 call	save_sram_hook
 
 SECTION "Save SRAM hook", ROM0[$00F0]
 save_sram_hook:
 	;original code
-	call	$4ccc ; _SaveGameData
+	call	$4c10 ; _SaveGameData
 	;new code
 	call	save_sram_to_flash
 	ret
 
+ENDC
 
-INCLUDE "src/batteryless.asm"

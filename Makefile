@@ -1,18 +1,6 @@
-roms := \
-        roms/pokegold_rtc.gbc\
-	roms/pokesilver_rtc.gbc \
-	roms/pokecrystal_rtc.gbc \
-	roms/pokecrystal11_rtc.gbc
-
-pokegold_rtc_baserom = pokegold.gbc
-pokesilver_rtc_baserom = pokesilver.gbc
-pokecrystal_rtc_baserom = pokecrystal.gbc
-pokecrystal11_rtc_baserom = pokecrystal11.gbc
-
-pokegold_rtc_asmfile = pokegold_rtc
-pokesilver_rtc_asmfile = pokegold_rtc
-pokecrystal_rtc_asmfile = pokecrystal_rtc
-pokecrystal11_rtc_asmfile = pokecrystal_rtc
+# Makefile specific
+.PHONY: clean all patches_rtc patches_batteryless patches_batteryless_rtc
+.SECONDEXPANSION:
 
 RGBDS ?=
 RGBASM  ?= $(RGBDS)rgbasm
@@ -20,45 +8,60 @@ RGBFIX  ?= $(RGBDS)rgbfix
 RGBGFX  ?= $(RGBDS)rgbgfx
 RGBLINK ?= $(RGBDS)rgblink
 
+# get targets - every roms/* subdir with a input.gbc present
+targets = $(patsubst %/, %, $(subst roms/, , $(dir $(wildcard roms/*/input.gbc))))
+
+roms_rtc = $(foreach targetdir, ${targets}, \
+$(shell grep -o "_RTC" roms/${targetdir}/settings.asm >/dev/null && echo "roms/${targetdir}/${targetdir}_rtc.gbc"))
+
+roms_batteryless = $(foreach targetdir, ${targets}, \
+$(shell grep -o "_BATTERYLESS" roms/${targetdir}/settings.asm >/dev/null && echo "roms/${targetdir}/${targetdir}_batteryless.gbc"))
+
+roms_batteryless_rtc = $(foreach targetdir, ${targets}, \
+$(shell { grep -o _RTC roms/${targetdir}/settings.asm >/dev/null && grep -o _BATTERYLESS roms/${targetdir}/settings.asm >/dev/null ;} && echo "roms/${targetdir}/${targetdir}_batteryless_rtc.gbc" ))
+
+# if [ "$(grep -o _RTC roms/pokecrystal/settings.asm)" == "_RTC" -a "$(grep -o _BATTERYLESS roms/pokecrystal/settings.asm)" == "_BATTERYLESS" ]; then echo true; fi
+
+roms = $(roms_rtc) $(roms_batteryless) $(roms_batteryless_rtc)
+
+
+all: patches_rtc patches_batteryless patches_batteryless_rtc
+
+patches_rtc: $(roms_rtc:.gbc=.bps)
+
+patches_batteryless: $(roms_batteryless:.gbc=.bps)
+
+patches_batteryless_rtc: $(roms_batteryless_rtc:.gbc=.bps)
+
+
 # Create a sym/map for debug purposes if `make` run with `DEBUG=1`
 ifeq ($(DEBUG),1)
-RGBLINKFLAGS += -n roms/$*.sym -m roms/$*.map
+RGBLINKFLAGS += -n $(@:.gbc=.sym) -m $(@:.gbc=.map)
+RGBASMFLAGS = -E
 endif
-RGBLINKFLAGS += -O roms/$($*_baserom)
-RGBFIXFLAGS = -p0 -v
 
-.PHONY: clean all gold_rtc
-.SECONDEXPANSION:
 
-patches/%.bps: roms/%.gbc roms/$$(%_baserom)
-	flips --create --bps roms/$($*_baserom) roms/$*.gbc $@
+$(roms_rtc:.gbc=.o): RGBASMFLAGS += -D_RTC
+$(roms_batteryless:.gbc=.o): RGBASMFLAGS += -D_BATTERYLESS
+$(roms_batteryless_rtc:.gbc=.o): RGBASMFLAGS += -D_BATTERYLESS -D_RTC
 
-roms/%.gbc: src/$$(%_asmfile).o roms/$$(%_baserom)
-	$(RGBLINK) $(RGBLINKFLAGS) -o $@ $<
-	$(RGBFIX) $(RGBFIXFLAGS) $@
 
-%.o: %.asm
-	$(RGBASM) -o $@ $<
+$(roms:.gbc=.bps): $$(patsubst %.bps,%.gbc,$$@)
+	flips --create --bps $(@D)/input.gbc $< $@
 
-all: gold_rtc silver_rtc crystal_rtc crystal11_rtc
+$(roms): $$(patsubst %.gbc,%.o,$$@)
+	$(RGBLINK) $(RGBLINKFLAGS) -O $(@D)/input.gbc -o $@ $<
+	$(RGBFIX) -p0 -v $@
+	$(RM) $<
 
-gold_rtc: patches/pokegold_rtc.bps
+$(roms:.gbc=.o): $$(@D)/settings.asm src/main.asm
+	$(RGBASM) $(RGBASMFLAGS) -o $@ --preinclude $< src/main.asm
 
-silver_rtc: patches/pokesilver_rtc.bps
-
-crystal_rtc: patches/pokecrystal_rtc.bps
-
-crystal11_rtc: patches/pokecrystal11_rtc.bps
-
-roms:   roms/pokegold_rtc.gbc \
-	roms/pokesilver_rtc.gbc \
-	roms/pokecrystal_rtc.gbc \
-	roms/pokecrystal11_rtc.gbc
 
 clean:
 	$(RM) $(roms) \
+	$(roms:.gbc=.bps) \
 	$(roms:.gbc=.sym) \
 	$(roms:.gbc=.map) \
-	$(patsubst roms/%,src/%,$(roms:.gbc=.o)) \
-	$(patsubst roms/%,patches/%,$(roms:.gbc=.bps))
+	$(roms:.gbc=.o)
 
